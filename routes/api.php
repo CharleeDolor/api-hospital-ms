@@ -14,7 +14,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// crud records
+//crud records
 Route::get('/records', [RecordsController::class, 'index'])->middleware('auth:sanctum');
 Route::get('/records/{id}', [RecordsController::class, 'show'])->middleware('auth:sanctum');
 Route::post('/records', [RecordsController::class, 'store'])->middleware('auth:sanctum');
