@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Appointment;
+use App\Models\Doctor;
+use App\Models\Patient;
+use App\Models\Record;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -62,6 +66,22 @@ class AuthController extends Controller
             'roles' => auth('sanctum')->user()->getRoleNames(),
             'permissions' => auth('sanctum')->user()->getAllPermissions()->pluck('name')
         ]);
+    }
+
+    public function getAllCount()
+    {
+        if (auth('sanctum')->user()->roles[0]->name == 'admin' ){
+            $payload = [
+                'patients' => Patient::count(),
+                'doctors' => Doctor::count(),
+                'appointments' => Appointment::count(),
+                'records' => Record::count()
+            ];
+
+            return response()->json([
+                'count' => $payload
+            ]);
+        }
     }
 
 }
