@@ -22,6 +22,7 @@ class RecordsController extends Controller
                         $records = Record::join('patients', 'records.patient_id', '=', 'patients.id')
                             ->join('doctors', 'records.doctor_id', '=', 'doctors.id')
                             ->select(
+                                'records.id as id',
                                 'records.date_of_consultation',
                                 'patients.name as patient_name',
                                 'records.diagnosis',
@@ -33,6 +34,7 @@ class RecordsController extends Controller
                         $records = Record::join('patients', 'records.patient_id', '=', 'patients.id')
                             ->join('doctors', 'records.doctor_id', '=', 'doctors.id')
                             ->select(
+                                'records.id as id',
                                 'records.date_of_consultation',
                                 'patients.name as patient_name',
                                 'records.diagnosis',
@@ -44,6 +46,7 @@ class RecordsController extends Controller
                         $records = Record::join('patients', 'records.patient_id', '=', 'patients.id')
                             ->join('doctors', 'records.doctor_id', '=', 'doctors.id')
                             ->select(
+                                'records.id as id',
                                 'records.date_of_consultation',
                                 'patients.name as patient_name',
                                 'records.diagnosis',
@@ -74,7 +77,16 @@ class RecordsController extends Controller
             // check permissions
             $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
             if (in_array('view records', $permissions)) {
-                $record = Record::where('id', $id)->firstOrFail();
+                $record = Record::join('patients', 'records.patient_id', '=', 'patients.id')
+                ->join('doctors', 'records.doctor_id', '=', 'doctors.id')
+                ->select(
+                    'records.id as id',
+                    'records.date_of_consultation',
+                    'patients.name as patient_name',
+                    'records.diagnosis',
+                    'records.recommendations',
+                    'doctors.name as doctor_name'
+                )->where('records.id', $id)->firstOrFail();
 
                 return response()->json([
                     'record' => $record
