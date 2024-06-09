@@ -33,9 +33,7 @@ class RecordsController extends Controller
                     ], 200);
                 }
 
-                return response()->json([
-                    'records' => $records,
-                ], 200);
+                return response()->json($records);
             } else {
                 return response()->json([
                     'message' => 'Forbidden',
