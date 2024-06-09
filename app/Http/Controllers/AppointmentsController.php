@@ -7,67 +7,6 @@ use App\Models\Appointment;
 
 class AppointmentsController extends Controller
 {
-    public function index(Request $request)
-    {
-        try {
-            // check permissions
-            $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-            if (in_array('view appointments', $permissions)) {
-
-                switch (auth('sanctum')->user()->roles[0]) {
-                    case "patient":
-                        $current_patient_id = $request->user('web')->details_id;
-                        $appointments = Appointment::where('patient_id', $current_patient_id)->firstOrFail();
-                        break;
-
-                    case "doctor": 
-                        $current_doctor_id = $request->user('web')->details_id;
-                        $appointments = Appointment::where('doctor_id', $current_doctor_id)->firstOrFail();
-                        break;
-                    
-                    default:
-                        $appointments = Appointment::all();
-                        break;
-                }
-
-                return response()->json([
-                    'appointments' => $appointments,
-                ], 200);
-            } else {
-                return response()->json([
-                    'message' => 'Forbidden',
-                ], 403);
-            }
-        } catch (\Throwable $th) {
-            return response()->json([
-                'message' => 'Something went wrong. Please try again' . $th,
-            ], 500);
-        }
-    }
-
-    public function show($id)
-    {
-        try {
-            // check permissions
-            $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-            if (in_array('view appointments', $permissions)) {
-                $appointment = Appointment::where('id', $id)->firstOrFail();
-
-                return response()->json([
-                    'appointment' => $appointment
-                ], 200);
-            } else {
-                return response()->json([
-                    'message' => 'Forbidden',
-                ], 403);
-            }
-        } catch (\Throwable $th) {
-            return response()->json([
-                'message' => 'Something went wrong. Please try again' . $th,
-            ], 500);
-        }
-    }
-
     public function store(Request $request)
     {
         try {
