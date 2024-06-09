@@ -14,6 +14,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// crud appointments
+Route::get('/appointments', [AppointmentsController::class, 'index'])->middleware('auth:sanctum');
+Route::get('/appointments/{id}', [AppointmentsController::class, 'show'])->middleware('auth:sanctum');
+Route::post('/appointments', [AppointmentsController::class, 'store'])->middleware('auth:sanctum');
+Route::put('/appointments/{id}', [AppointmentsController::class, 'update'])->middleware('auth:sanctum');
+Route::delete('/appointments/{id}', [AppointmentsController::class, 'destroy'])->middleware('auth:sanctum');
+
 //crud records
 Route::get('/records', [RecordsController::class, 'index'])->middleware('auth:sanctum');
 Route::get('/records/{id}', [RecordsController::class, 'show'])->middleware('auth:sanctum');
