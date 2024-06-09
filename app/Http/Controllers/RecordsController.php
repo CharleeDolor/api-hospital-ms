@@ -6,31 +6,54 @@ use App\Models\Appointment;
 use App\Models\Record;
 use Illuminate\Http\Request;
 
-use function PHPUnit\Framework\isNull;
-
 class RecordsController extends Controller
 {
     public function index(Request $request)
     {
         try {
             // check permissions
-            $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
+            $permissions = auth('sanctum')->user()->getAllPermissions()->pluck('name')->toArray();
             if (in_array('view records', $permissions)) {
+                $currentUserId = auth('sanctum')->user()->details_id;
+                $userRole = auth('sanctum')->user()->getRoleNames()->first();
 
-                $current_id = auth('sanctum')->user()->details_id;
-
-                if (auth('sanctum')->user()->getRoleNames()[0] == "patient") {
-                    $records = Record::where('patient_id', $current_id)->first();
-                } else if (auth('sanctum')->user()->getRoleNames()[0] == "doctor") {
-                    $records = Record::where('patient_id', $current_id)->first();
-                } else {
-                    $records = Record::all();
-                }
-                
-                if ($records == null) {
-                    return response()->json([
-                        'message' => $records
-                    ], 200);
+                switch ($userRole) {
+                    case 'admin':
+                        $records = Record::join('patients', 'records.patient_id', '=', 'patients.id')
+                            ->join('doctors', 'records.doctor_id', '=', 'doctors.id')
+                            ->select(
+                                'records.date_of_consultation',
+                                'patients.name as patient_name',
+                                'records.diagnosis',
+                                'records.recommendations',
+                                'doctors.name as doctor_name'
+                            )->get();
+                        break;
+                    case 'doctor':
+                        $records = Record::join('patients', 'records.patient_id', '=', 'patients.id')
+                            ->join('doctors', 'records.doctor_id', '=', 'doctors.id')
+                            ->select(
+                                'records.date_of_consultation',
+                                'patients.name as patient_name',
+                                'records.diagnosis',
+                                'records.recommendations',
+                                'doctors.name as doctor_name'
+                            )->where('doctors.id', $currentUserId)->get();
+                        break;
+                    case 'patient':
+                        $records = Record::join('patients', 'records.patient_id', '=', 'patients.id')
+                            ->join('doctors', 'records.doctor_id', '=', 'doctors.id')
+                            ->select(
+                                'records.date_of_consultation',
+                                'patients.name as patient_name',
+                                'records.diagnosis',
+                                'records.recommendations',
+                                'doctors.name as doctor_name'
+                            )->where('patients.id', $currentUserId)->get();
+                        break;
+                    default:
+                        $records = Record::all();
+                        break;
                 }
 
                 return response()->json($records);
@@ -45,7 +68,6 @@ class RecordsController extends Controller
             ], 500);
         }
     }
-
     public function show($id)
     {
         try {
