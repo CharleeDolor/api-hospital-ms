@@ -22,6 +22,7 @@ class AppointmentsController extends Controller
                         $appointments = json_decode(Appointment::join('patients', 'appointments.patient_id', '=', 'patients.id')
                             ->join('doctors', 'appointments.doctor_id', '=', 'doctors.id')
                             ->select(
+                                'appointments.id as id',
                                 'appointments.type as type',
                                 'appointments.queue_number as queue_number',
                                 'appointments.day as day',
@@ -37,6 +38,7 @@ class AppointmentsController extends Controller
                         $appointments = json_decode(Appointment::join('doctors', 'appointments.patient_id', '=', 'doctors.id')
                             ->join('patients', 'appointments.patient_id', '=', 'patients.id')
                             ->select(
+                                'appointments.id as id',
                                 'appointments.type as type',
                                 'appointments.queue_number as queue_number',
                                 'appointments.day as day',
@@ -52,6 +54,7 @@ class AppointmentsController extends Controller
                         $appointments = json_decode(Appointment::join('doctors', 'appointments.patient_id', '=', 'doctors.id')
                             ->join('patients', 'appointments.patient_id', '=', 'patients.id')
                             ->select(
+                                'appointments.id as id',
                                 'appointments.type as type',
                                 'appointments.queue_number as queue_number',
                                 'appointments.day as day',
@@ -195,7 +198,7 @@ class AppointmentsController extends Controller
             }
         } catch (\Throwable $th) {
             return response()->json([
-                'message' => 'Something went wrong. Please try again',
+                'message' => 'Something went wrong. Please try again'.$th,
             ], 500);
         }
     }
