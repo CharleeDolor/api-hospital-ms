@@ -21,6 +21,12 @@ Route::post('/patients', [PatientsController::class, 'store'])->middleware('auth
 Route::put('/patients/{id}', [PatientsController::class, 'update'])->middleware('auth:sanctum');
 Route::delete('/patients/{id}', [PatientsController::class, 'destroy'])->middleware('auth:sanctum');
 
+// crud doctors
+Route::get('/doctors', [DoctorsController::class, 'index'])->middleware('auth:sanctum');
+Route::get('/doctors/{id}', [DoctorsController::class, 'show'])->middleware('auth:sanctum');
+Route::post('/doctors', [DoctorsController::class, 'store'])->middleware('auth:sanctum');
+Route::put('/doctors/{id}', [DoctorsController::class, 'update'])->middleware('auth:sanctum');
+Route::delete('/doctors/{id}', [DoctorsController::class, 'destroy'])->middleware('auth:sanctum');
 
 // crud appointments
 Route::get('/appointments', [AppointmentsController::class, 'index'])->middleware('auth:sanctum');
