@@ -4,7 +4,6 @@ use App\Http\Controllers\AppointmentsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DoctorsController;
 use App\Http\Controllers\PatientsController;
-use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\RecordsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -13,6 +12,24 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// user authentication routes
+Route::post('/login', [AuthController::class, 'login']);
+
+// route for creating account
+Route::post('/register', [UserController::class, 'store']);
+
+// route for getting all count of rows
+Route::get('/count', [AuthController::class, 'getAllCount'])->middleware('auth:sanctum');
+
+// route logout
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+
+// route get role/permissions
+Route::get('/user/permissions', [AuthController::class, 'getPermissions'])->middleware('auth:sanctum');
+
+// route get user information
+Route::get('/user/information', [UserController::class, 'getUserInformation'])->middleware('auth:sanctum');
 
 // crud patients
 Route::get('/patients', [PatientsController::class, 'index'])->middleware('auth:sanctum');

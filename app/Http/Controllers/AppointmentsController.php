@@ -49,7 +49,18 @@ class AppointmentsController extends Controller
                         break;
 
                     default:
-                        $appointments = Appointment::all();
+                        $appointments = json_decode(Appointment::join('doctors', 'appointments.patient_id', '=', 'doctors.id')
+                            ->join('patients', 'appointments.patient_id', '=', 'patients.id')
+                            ->select(
+                                'appointments.type as type',
+                                'appointments.queue_number as queue_number',
+                                'appointments.day as day',
+                                'appointments.patient_id as patient_id',
+                                'patients.name as patients_name',
+                                'doctors.name as doctors_name'
+                            )
+                            ->getQuery()
+                            ->get(), true);
                         break;
                 }
 
@@ -147,7 +158,6 @@ class AppointmentsController extends Controller
 
                 $appointment->day = $request->day;
                 $appointment->queue_number = Appointment::where('doctor_id', $request->doctor_id)->where('day', $request->day)->max('queue_number') + 1;
-                
                 $appointment->save();
 
                 return response()->json([
