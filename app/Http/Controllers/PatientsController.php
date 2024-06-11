@@ -15,10 +15,9 @@ class PatientsController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:100',
-            'email' => 'required|email|unique:patients',
+            'email' => 'sometimes|required|email|unique:patients',
             'birthday' => 'required|date_format:Y-m-d|before:today',
             'address' => 'required|max:150',
-            "age" => 'required',
             "gender" => 'required',
             "marital_status" => 'required',
             "contact_number" => 'required',
@@ -55,7 +54,7 @@ class PatientsController extends Controller
 
         if (in_array('create patients', $permissions)) {
 
-            if ($this->validateRequest($request)) {
+            if ( count($this->validateRequest($request)) > 0 ) {
                 return response()->json([
                     'message' => $this->validateRequest($request)
                 ], 200);
@@ -121,16 +120,15 @@ class PatientsController extends Controller
 
             if (in_array('edit patients', $permissions)) {
 
-                if ($this->validateRequest($request)) {
+                if ( count($this->validateRequest($request)) > 0) {
                     return response()->json([
-                        'message' => $this->validateRequest($request)
+                        'errors' => $this->validateRequest($request)
                     ], 200);
                 }
 
                 $patient = Patient::where('id', $id)->firstOrFail();
 
                 $patient->name = $request->name;
-                $patient->email = $request->email;
                 $patient->address = $request->address;
                 $patient->birthday = $request->birthday;
                 $patient->age = floor(abs(strtotime(date('Y-m-d')) - strtotime($request->birthday)) / (365 * 60 * 60 * 24));

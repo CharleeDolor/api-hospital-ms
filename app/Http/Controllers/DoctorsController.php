@@ -18,7 +18,7 @@ class DoctorsController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:100',
-            'email' => 'required|email|unique:doctors',
+            'email' => 'sometimes|required|email|unique:doctors',
             'address' => 'required|max:150',
             "phone_number" => 'required',
             "medical_license" => 'required',
@@ -87,7 +87,7 @@ class DoctorsController extends Controller
             $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
             if (in_array('create doctors', $permissions)) {
 
-                if ($this->validateRequest($request)) {
+                if ( count($this->validateRequest($request)) > 0) {
                     return response()->json([
                         'message' => $this->validateRequest($request)
                     ], 200);
@@ -148,16 +148,15 @@ class DoctorsController extends Controller
             $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
             if (in_array('edit doctors', $permissions)) {
 
-                if ($this->validateRequest($request)) {
+                if ( count($this->validateRequest($request)) > 0) {
                     return response()->json([
-                        'message' => $this->validateRequest($request)
+                        'errors' => $this->validateRequest($request)
                     ], 200);
                 }
 
                 $doctor = Doctor::where('id', $id)->firstOrFail();
 
                 $doctor->name = $request->name;
-                $doctor->email = $request->email;
                 $doctor->address = $request->address;
                 $doctor->phone_number = $request->phone_number;
                 $doctor->medical_license = $request->medical_license;

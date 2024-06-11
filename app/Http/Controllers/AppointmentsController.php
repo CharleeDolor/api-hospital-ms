@@ -8,6 +8,10 @@ use App\Models\Appointment;
 class AppointmentsController extends Controller
 {
 
+    private function validateRequest(){
+
+    }
+
     public function index()
     {
         try {
@@ -17,7 +21,7 @@ class AppointmentsController extends Controller
 
                 $current_user_id = auth('sanctum')->user()->details_id;
 
-                switch (auth('sanctum')->user()->getRoleNames()->first()) {
+                switch (auth('sanctum')->user()->roles[0]->name) {
                     case "patient":
                         $appointments = json_decode(Appointment::join('patients', 'appointments.patient_id', '=', 'patients.id')
                             ->join('doctors', 'appointments.doctor_id', '=', 'doctors.id')
@@ -35,7 +39,7 @@ class AppointmentsController extends Controller
                         break;
 
                     case "doctor":
-                        $appointments = json_decode(Appointment::join('doctors', 'appointments.patient_id', '=', 'doctors.id')
+                        $appointments = json_decode(Appointment::join('doctors', 'appointments.id', '=', 'doctors.id')
                             ->join('patients', 'appointments.patient_id', '=', 'patients.id')
                             ->select(
                                 'appointments.id as id',
@@ -50,8 +54,8 @@ class AppointmentsController extends Controller
                             ->get(), true);
                         break;
 
-                    default:
-                        $appointments = json_decode(Appointment::join('doctors', 'appointments.patient_id', '=', 'doctors.id')
+                    case "admin":
+                        $appointments = json_decode(Appointment::join('doctors', 'appointments.doctor_id', '=', 'doctors.id')
                             ->join('patients', 'appointments.patient_id', '=', 'patients.id')
                             ->select(
                                 'appointments.id as id',
@@ -64,6 +68,9 @@ class AppointmentsController extends Controller
                             )
                             ->getQuery()
                             ->get(), true);
+                            break;
+                    default:
+                        $appointments = 'You are not allowed here';
                         break;
                 }
 

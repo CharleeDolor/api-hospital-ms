@@ -90,8 +90,8 @@ class AuthController extends Controller
 
             case 'doctor':
                 $payload = [
-                    'appointments' => Appointment::where('patient_id', auth('sanctum')->user()->details_id)->count(),
-                    'records' => Record::where('patient_id', auth('sanctum')->user()->details_id)->count()
+                    'appointments' => Appointment::where('doctor_id', auth('sanctum')->user()->details_id)->count(),
+                    'records' => Record::where('doctor_id', auth('sanctum')->user()->details_id)->count()
                 ];
                 break;
         }

@@ -96,7 +96,7 @@ $adminAccount = \App\Models\User::factory()->create([
 
         // //creating dummy patient account and patient details
         // Patient::create([
-        //     "name" => "Test patient",
+        //     "name" => "Dolor Charlee B.",
         //     "email" => "dolorcharlee55@gmail.com",
         //     "address" => "B6 L6 Phase 3 Andrea Paz Barandal Calamba City",
         //     "birthday" => "2000-01-01",
@@ -104,14 +104,14 @@ $adminAccount = \App\Models\User::factory()->create([
         //     "marital_status" => "Single",
         //     "contact_number" => "09666807016",
         //     "blood_type" => "B+",
-        //     "weight" => 57,
+        //     "weight" => 55,
         //     "height" => 170
         // ]);
 
         // $patient1account = User::create([
-        //     "name" => "Test patient",
+        //     "name" => "Dolor Charlee B.",
         //     "email" => "dolorcharlee55@gmail.com",
-        //     "password" => Hash::make("hms_password2024"),
+        //     "password" => Hash::make("outpatient_2024"),
         //     "type" => 3,
         //     "details_id" => 1
         // ]);
@@ -120,10 +120,10 @@ $adminAccount = \App\Models\User::factory()->create([
 
         // // creating dummy doctor account and doctor details
         // Doctor::create([
-        //     "name" => "Dr. Test Testing",
-        //     "email" => "testtesting@gmail.com",
-        //     "address" => "testing address",
-        //     "phone_number" => "09666807016",
+        //     "name" => "Dr. Jamie Jaquez Jr.",
+        //     "email" => "jaquezjamiemd@gmail.com",
+        //     "address" => "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+        //     "phone_number" => "09917996956",
         //     "medical_license" => "mdr",
         //     "gender" => "male",
         //     "medical_school_graduated" => "Test med school",
@@ -134,8 +134,8 @@ $adminAccount = \App\Models\User::factory()->create([
 
         // $doctorAccount = User::create([
         //     "name" => "Dr. Test Testing",
-        //     "email" => "testtesting@gmail.com",
-        //     "password" => Hash::make("doc2024_hmspassword"),
+        //     "email" => "jaquezjamiemd@gmail.com",
+        //     "password" => Hash::make("doc2024_hms"),
         //     "type" => 2,
         //     "details_id" => 1
         // ]);
