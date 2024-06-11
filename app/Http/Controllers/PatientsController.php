@@ -11,6 +11,25 @@ use Illuminate\Support\Facades\Validator;
 class PatientsController extends Controller
 {
     //
+    private function validateRequest(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|max:100',
+            'email' => 'required|email|unique:patients',
+            'birthday' => 'required|date_format:Y-m-d|before:today',
+            'address' => 'required|max:150',
+            "age" => 'required',
+            "gender" => 'required',
+            "marital_status" => 'required',
+            "contact_number" => 'required',
+            "blood_type" => 'required',
+            "weight" => 'required|numeric|min:1',
+            "height" => 'required|numeric|min:1'
+        ]);
+
+        return $validator->messages();
+    }
+
     public function index()
     {
         // check permissions
@@ -35,16 +54,10 @@ class PatientsController extends Controller
         $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
 
         if (in_array('create patients', $permissions)) {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|max:100',
-                'email' => 'required|email|unique:patients',
-                'birthday' => 'required|date_format:Y-m-d',
-                'address' => 'required|max:150',
-            ]);
 
-            if ($validator->fails()) {
+            if ($this->validateRequest($request)) {
                 return response()->json([
-                    'message' => $validator->messages()
+                    'message' => $this->validateRequest($request)
                 ], 200);
             }
 
@@ -53,7 +66,7 @@ class PatientsController extends Controller
                 "email" => $request->email,
                 "address" => $request->address,
                 "birthday" => $request->birthday,
-                "age" => floor( abs(strtotime(date('Y-m-d')) - strtotime($request->birthday)) / (365*60*60*24)),
+                "age" => floor(abs(strtotime(date('Y-m-d')) - strtotime($request->birthday)) / (365 * 60 * 60 * 24)),
                 "gender" => $request->gender,
                 "marital_status" => $request->marital_status,
                 "contact_number" => $request->contact_number,
@@ -64,7 +77,7 @@ class PatientsController extends Controller
 
             // check if email is already a user, if found then update user->details_id
             $user = User::where('email', $request->email)->first();
-            if($user){
+            if ($user) {
                 $user->details_id = $patient->id;
                 $user->save();
             } else {
@@ -107,13 +120,20 @@ class PatientsController extends Controller
             $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
 
             if (in_array('edit patients', $permissions)) {
+
+                if ($this->validateRequest($request)) {
+                    return response()->json([
+                        'message' => $this->validateRequest($request)
+                    ], 200);
+                }
+
                 $patient = Patient::where('id', $id)->firstOrFail();
 
                 $patient->name = $request->name;
                 $patient->email = $request->email;
                 $patient->address = $request->address;
                 $patient->birthday = $request->birthday;
-                $patient->age = floor( abs(strtotime(date('Y-m-d')) - strtotime($request->birthday)) / (365*60*60*24));
+                $patient->age = floor(abs(strtotime(date('Y-m-d')) - strtotime($request->birthday)) / (365 * 60 * 60 * 24));
                 $patient->gender = $request->gender;
                 $patient->marital_status = $request->marital_status;
                 $patient->contact_number = $request->contact_number;
@@ -133,7 +153,7 @@ class PatientsController extends Controller
             }
         } catch (\Throwable $th) {
             return response()->json([
-                'message' => "Something went wrong. Please try again".$th
+                'message' => "Something went wrong. Please try again" . $th
             ], 500);
         }
     }

@@ -70,18 +70,35 @@ class AuthController extends Controller
 
     public function getAllCount()
     {
-        if (auth('sanctum')->user()->roles[0]->name == 'admin' ){
-            $payload = [
-                'patients' => Patient::count(),
-                'doctors' => Doctor::count(),
-                'appointments' => Appointment::count(),
-                'records' => Record::count()
-            ];
+        switch (auth('sanctum')->user()->roles[0]->name) {
+            case 'admin':
+                $payload = [
+                    'patients' => Patient::count(),
+                    'doctors' => Doctor::count(),
+                    'appointments' => Appointment::count(),
+                    'records' => Record::count()
+                ];
+                break;
+            
+            case 'patient':
+                $payload = [
+                    'doctors' => Doctor::count(),
+                    'appointments' => Appointment::where('patient_id', auth('sanctum')->user()->details_id)->count(),
+                    'records' => Record::where('patient_id', auth('sanctum')->user()->details_id)->count()
+                ];
+                break;
 
-            return response()->json([
-                'count' => $payload
-            ]);
+            case 'doctor':
+                $payload = [
+                    'appointments' => Appointment::where('patient_id', auth('sanctum')->user()->details_id)->count(),
+                    'records' => Record::where('patient_id', auth('sanctum')->user()->details_id)->count()
+                ];
+                break;
         }
+
+        return response()->json([
+            'count' => $payload
+        ]);
     }
 
 }
