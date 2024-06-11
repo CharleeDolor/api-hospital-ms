@@ -39,7 +39,7 @@ class AppointmentsController extends Controller
                         break;
 
                     case "doctor":
-                        $appointments = json_decode(Appointment::join('doctors', 'appointments.id', '=', 'doctors.id')
+                        $appointments = json_decode(Appointment::join('doctors', 'appointments.doctor_id', '=', 'doctors.id')
                             ->join('patients', 'appointments.patient_id', '=', 'patients.id')
                             ->select(
                                 'appointments.id as id',
