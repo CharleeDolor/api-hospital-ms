@@ -8,17 +8,19 @@ use App\Models\Appointment;
 class AppointmentsController extends Controller
 {
 
-    private function validateRequest(){
-
+    private function validatePermission($request, $permission)
+    {
+        return $request->user()->can($permission);
     }
 
-    public function index()
+    private function validateRequest()
+    {
+    }
+
+    public function index(Request $request)
     {
         try {
-            // check permissions
-            $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-            if (in_array('view appointments', $permissions)) {
-
+            if ($this->validatePermission($request, 'view appointments')) {
                 $current_user_id = auth('sanctum')->user()->details_id;
 
                 switch (auth('sanctum')->user()->roles[0]->name) {
@@ -68,7 +70,7 @@ class AppointmentsController extends Controller
                             )
                             ->getQuery()
                             ->get(), true);
-                            break;
+                        break;
                     default:
                         $appointments = 'You are not allowed here';
                         break;
@@ -89,12 +91,10 @@ class AppointmentsController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         try {
-            // check permissions
-            $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-            if (in_array('view appointments', $permissions)) {
+            if ($this->validatePermission($request, 'view appointments')) {
                 $appointment = Appointment::where('id', $id)->firstOrFail();
 
                 return response()->json([
@@ -115,10 +115,7 @@ class AppointmentsController extends Controller
     public function store(Request $request)
     {
         try {
-            // check permissions
-            $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-            if (in_array('create appointments', $permissions)) {
-
+            if ($this->validatePermission($request, 'create appointments')) {
                 // query to appointments table to check duplicate appointment of a patient
                 $appointment = Appointment::where('patient_id', auth('sanctum')->user()->details_id)->get();
 
@@ -161,9 +158,7 @@ class AppointmentsController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            // check permissions
-            $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-            if (in_array('edit appointments', $permissions)) {
+            if ($this->validatePermission($request, 'edit appointments')) {
                 $appointment = Appointment::where('id', $id)->firstOrFail();
 
                 $appointment->day = $request->day;
@@ -185,12 +180,10 @@ class AppointmentsController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
-            // check permissions
-            $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-            if (in_array('delete appointments', $permissions)) {
+            if ($this->validatePermission($request, 'delete appointments')) {
                 $appointment = Appointment::where('id', $id)->firstOrFail();
 
                 $appointment->delete();
@@ -205,7 +198,7 @@ class AppointmentsController extends Controller
             }
         } catch (\Throwable $th) {
             return response()->json([
-                'message' => 'Something went wrong. Please try again'.$th,
+                'message' => 'Something went wrong. Please try again' . $th,
             ], 500);
         }
     }

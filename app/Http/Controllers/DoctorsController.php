@@ -14,6 +14,11 @@ use Illuminate\Support\Facades\Validator;
 class DoctorsController extends Controller
 {
 
+    private function validatePermission($request, $permission)
+    {
+        return $request->user()->can($permission);
+    }
+
     private function validateRequest(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -24,7 +29,7 @@ class DoctorsController extends Controller
             "medical_license" => 'required',
             "gender" => 'required',
             "medical_school_graduated" => 'required',
-            "year_graduated" => 'required|integer|min:1980|max:'.date('Y'),
+            "year_graduated" => 'required|integer|min:1980|max:' . date('Y'),
             "specialties" => 'required',
             "career_summary" => 'required|min:50'
         ]);
@@ -32,13 +37,10 @@ class DoctorsController extends Controller
         return $validator->messages();
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            // check permissions
-            $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-
-            if (in_array('view doctors', $permissions)) {
+            if ($this->validatePermission($request, 'view doctors')) {
                 $doctors = Doctor::all();
 
                 return response()->json([
@@ -56,13 +58,10 @@ class DoctorsController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         try {
-            // check permissions
-            $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-
-            if (in_array('view doctors', $permissions)) {
+            if ($this->validatePermission($request, 'view doctors')) {
                 $doctor = Doctor::where('id', $id)->firstOrFail();
 
                 return response()->json([
@@ -83,11 +82,8 @@ class DoctorsController extends Controller
     public function store(Request $request)
     {
         try {
-            // check permissions
-            $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-            if (in_array('create doctors', $permissions)) {
-
-                if ( count($this->validateRequest($request)) > 0) {
+            if ($this->validatePermission($request, 'create doctors')) {
+                if (count($this->validateRequest($request)) > 0) {
                     return response()->json([
                         'message' => $this->validateRequest($request)
                     ], 200);
@@ -144,11 +140,8 @@ class DoctorsController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            // check permissions
-            $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-            if (in_array('edit doctors', $permissions)) {
-
-                if ( count($this->validateRequest($request)) > 0) {
+            if ($this->validatePermission($request, 'edit doctors')) {
+                if (count($this->validateRequest($request)) > 0) {
                     return response()->json([
                         'errors' => $this->validateRequest($request)
                     ], 200);
@@ -186,10 +179,7 @@ class DoctorsController extends Controller
     public function destroy(Request $request, $id)
     {
         try {
-            // check permissions
-            $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-            if (in_array('delete doctors', $permissions)) {
-
+            if ($this->validatePermission($request, 'delete doctors')) {
                 // inner join tables records, patients, and doctors
                 $records = json_decode(Record::join('patients', 'records.patient_id', '=', 'patients.id')
                     ->join('doctors', 'records.doctor_id', '=', 'doctors.id')

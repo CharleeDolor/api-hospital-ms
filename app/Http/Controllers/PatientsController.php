@@ -6,11 +6,16 @@ use Illuminate\Http\Request;
 use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Validator;
 
 class PatientsController extends Controller
 {
-    //
+    private function validatePermission($request, $permission)
+    {
+        return $request->user()->can($permission);
+    }
+
     private function validateRequest(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -29,12 +34,9 @@ class PatientsController extends Controller
         return $validator->messages();
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        // check permissions
-        $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-
-        if (in_array('view patients', $permissions)) {
+        if ($this->validatePermission($request, 'view patients')) {
             $patients = Patient::all();
 
             return response()->json([
@@ -49,12 +51,8 @@ class PatientsController extends Controller
 
     public function store(Request $request)
     {
-        // check permissions
-        $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-
-        if (in_array('create patients', $permissions)) {
-
-            if ( count($this->validateRequest($request)) > 0 ) {
+        if ($this->validatePermission($request, 'create patients')) {
+            if (count($this->validateRequest($request)) > 0) {
                 return response()->json([
                     'message' => $this->validateRequest($request)
                 ], 200);
@@ -97,7 +95,7 @@ class PatientsController extends Controller
             ], 201);
         } else {
             return response()->json([
-                'message' => 'Forbidden',
+                'message' => 'Forbidden'
             ], 403);
         }
     }
@@ -114,13 +112,8 @@ class PatientsController extends Controller
     public function update(Request $request, $id)
     {
         try {
-
-            // check permissions
-            $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-
-            if (in_array('edit patients', $permissions)) {
-
-                if ( count($this->validateRequest($request)) > 0) {
+            if ($this->validatePermission($request, 'edit patients')) {
+                if (count($this->validateRequest($request)) > 0) {
                     return response()->json([
                         'errors' => $this->validateRequest($request)
                     ], 200);
@@ -146,7 +139,7 @@ class PatientsController extends Controller
                 ], 200);
             } else {
                 return response()->json([
-                    'message' => "Forbidden"
+                    'message' => 'Forbidden'
                 ], 403);
             }
         } catch (\Throwable $th) {
@@ -156,13 +149,10 @@ class PatientsController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
-            // check permissions
-            $permissions = json_decode(auth('sanctum')->user()->getAllPermissions()->pluck('name'));
-
-            if (in_array('delete patients', $permissions)) {
+            if ($this->validatePermission($request, 'delete patients')) {
                 $patient = Patient::where('id', $id)->firstOrFail();
                 $user = User::where('email', $patient->email)->firstOrFail();
 
@@ -174,7 +164,7 @@ class PatientsController extends Controller
                 ], 200);
             } else {
                 return response()->json([
-                    'message' => "Forbidden"
+                    'message' => 'Forbidden'
                 ], 403);
             }
         } catch (\Throwable $th) {

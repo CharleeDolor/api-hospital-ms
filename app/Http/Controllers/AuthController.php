@@ -21,26 +21,27 @@ class AuthController extends Controller
                 'password' => 'required|string',
             ]);
 
-            if (!Auth::attempt($request->only('email', 'password'))) {
+            if (Auth::attempt($request->only('email', 'password'))) {
+                $user = User::where('email', $data['email'])->first();
+
+                if ($user->type == 1) {
+                    $token = $user->createToken('user', ['admin'])->plainTextToken;
+                }
+
+                if ($user->type == 2) {
+                    $token = $user->createToken('user', ['doctor'])->plainTextToken;
+                }
+
+                if ($user->type == 3) {
+                    $token = $user->createToken('user', ['patient'])->plainTextToken;
+                }
+
+                return response()->json(['token' => $token], 200);
+            } else {
                 return response()->json(['message' => 'wrong credentials'], 401);
             }
 
-            $user = User::where('email', $data['email'])->first();
-
-            if($user->type == 1){
-                $token = $user->createToken('user', ['admin'])->plainTextToken;
-            }
-
-            if($user->type == 2){
-                $token = $user->createToken('user', ['doctor'])->plainTextToken;
-            }
-
-            if($user->type == 3){
-                $token = $user->createToken('user', ['patient'])->plainTextToken;
-            }
             
-
-            return response()->json(['token' => $token], 200);
         } catch (\Throwable $th) {
             return response()->json(['message' => $th], 500);
         }
@@ -53,18 +54,18 @@ class AuthController extends Controller
             $accessToken = $request->bearerToken();
             $token = PersonalAccessToken::findToken($accessToken);
             $token->delete();
-            
+
             return response()->json(['message' => 'Logged out'], 200);
         } catch (\Throwable $th) {
-            return response()->json(['message' => 'Server Error: Something went wrong. '.$th], 500);
+            return response()->json(['message' => 'Server Error: Something went wrong. ' . $th], 500);
         }
     }
 
-    public function getPermissions()
+    public function getPermissions(Request $request)
     {
         return response()->json([
-            'roles' => auth('sanctum')->user()->getRoleNames(),
-            'permissions' => auth('sanctum')->user()->getAllPermissions()->pluck('name')
+            'roles' => $request->user()->getRoleNames()->first(),
+            'permissions' => $request->user()->getAllPermissions()->pluck('name'),
         ]);
     }
 
@@ -79,7 +80,7 @@ class AuthController extends Controller
                     'records' => Record::count()
                 ];
                 break;
-            
+
             case 'patient':
                 $payload = [
                     'doctors' => Doctor::count(),
@@ -100,5 +101,4 @@ class AuthController extends Controller
             'count' => $payload
         ]);
     }
-
 }
